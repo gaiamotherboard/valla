@@ -4,6 +4,7 @@
 //! restorable. The owner tastes and decides. Nothing reaches the house without approval.
 
 mod corrector;
+mod declaration;
 mod form;
 mod house;
 mod journal;
@@ -13,6 +14,7 @@ mod lexicon;
 mod recipes;
 mod sensors;
 mod sha256;
+mod standards;
 mod util;
 mod voice;
 mod web;
@@ -30,12 +32,15 @@ const HELP: &str = "Valla, steward of the codebase.
   valla restore [entry]          return the house to the last known-good state (or that entry)
   valla journal [count]          the books, and whether they are unbroken
   valla doctor                   machine, kitchen, journal and sensors, checked
+  valla standards                the house standards every dish answers to, and the kitchen's
+                                 declaration of what it can and cannot do
   valla words                    the proper words for this house, and which you have used
   valla recipes                  sample tools I can lay out
   valla web [folder] [--port N]  the chat in a browser, for one house or a folder of them
                                  (localhost only unless --bind; it has no login of its own)
 
-Kitchen settings: ~/.config/valla/config  (kitchen_url, model, api_key)";
+Kitchen settings: ~/.config/valla/config  (kitchen_url, model, api_key)
+Kitchen declaration: ~/.config/valla/kitchen.declaration  (optional; a built-in one is used otherwise)";
 
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
@@ -59,13 +64,14 @@ fn main() {
         "journal" => house::journal(rest.first().and_then(|s| s.parse().ok()).unwrap_or(20)),
         "doctor" => house::doctor(),
         "words" => house::words(),
+        "standards" => house::standards(),
         "web" => web::serve(rest),
         "recipes" => {
             house::list_recipes();
             Ok(())
         }
         "brag" => {
-            voice::say("brag.immutable", &[]);
+            voice::brag();
             Ok(())
         }
         "version" | "--version" => {

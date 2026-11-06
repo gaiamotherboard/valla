@@ -3,10 +3,11 @@
 //! ## EXEGESIS      E1: "exact quote" @ request        (or @ path/to/file)
 //! ## HERMENEUTICS  H1 [E1]: what I take it to mean
 //! ## SILENCE       S1: what the record does not say    (or: none)
+//! ## STANDARDS     backup: met, how  |  n/a, why  |  cannot, why   (one line per house standard)
 //! ## PLAN          P1 [E1,H1]: a step, naming every file it touches
 //! ## CHANGES       ### FILE path  + fenced full content,  or  ### DELETE path
 
-pub const SECTIONS: [&str; 5] = ["EXEGESIS", "HERMENEUTICS", "SILENCE", "PLAN", "CHANGES"];
+pub const SECTIONS: [&str; 6] = ["EXEGESIS", "HERMENEUTICS", "SILENCE", "STANDARDS", "PLAN", "CHANGES"];
 
 #[derive(Debug, Clone)]
 pub struct Quote {
@@ -42,6 +43,7 @@ pub struct Form {
     pub exegesis: Vec<Quote>,
     pub hermeneutics: Vec<Cited>,
     pub silence: Vec<String>,
+    pub standards: Vec<crate::standards::Answer>,
     pub plan: Vec<Cited>,
     pub changes: Vec<Change>,
     pub malformed: Vec<(String, String)>,
@@ -150,6 +152,14 @@ pub fn parse(raw: &str) -> Form {
                     f.silence.push(t);
                 }
             }
+            "STANDARDS" => {
+                for l in lines.iter().filter(|l| !l.trim().is_empty()) {
+                    match crate::standards::read_answer(l) {
+                        Some(a) => f.standards.push(a),
+                        None => f.malformed.push(("STANDARDS".into(), l.trim().to_string())),
+                    }
+                }
+            }
             "CHANGES" => f.changes = parse_changes(&lines),
             _ => {}
         }
@@ -203,6 +213,9 @@ E2: "pub struct Item {" @ src/main.rs
 H1 [E1,E2]: Item gains a notes string.
 ## SILENCE
 S1: Whether notes are searchable.
+## STANDARDS
+backup: met, notes live in the same data file as items
+battery-backup: n/a, no new writes beyond the existing store
 ## PLAN
 P1 [H1]: Add notes to Item in src/main.rs.
 ## CHANGES
@@ -214,7 +227,8 @@ fn main() {}
     #[test]
     fn reads_the_form() {
         let f = parse(SAMPLE);
-        assert_eq!(f.present.len(), 5);
+        assert_eq!(f.present.len(), 6);
+        assert_eq!(f.standards.len(), 2);
         assert_eq!(f.exegesis[1].source, "src/main.rs");
         assert_eq!(f.exegesis[0].text, "add a notes field");
         assert_eq!(f.hermeneutics[0].cites, vec!["E1", "E2"]);

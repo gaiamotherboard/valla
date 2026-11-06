@@ -1,0 +1,15 @@
+# The house standards: what the kitchen serves. One per line:
+#   name: what it means for software | what it means for hardware
+# Every kitchen return must answer each one under STANDARDS:
+#   name: met, how
+#   name: n/a, why it does not apply
+#   name: cannot, why it cannot be met
+# A house may keep its own valla.standards to replace this list.
+
+best-practice: Follows the accepted practice for the language and tool, and says which | Follows the maker's specs and ratings, and says which
+cyber-safety: Least privilege, no secrets in code, no open ports nobody asked for, pinned dependencies | No default passwords, current firmware, exposed interfaces listed
+backup: Data it creates has a backup path, and the restore is tested | Config and data on the machine are backed up off the machine
+battery-backup: Survives power loss without corruption and resumes cleanly | Runs on battery or UPS, and shuts down cleanly before the battery runs out
+redundancy: No single point of failure unless it is named | A second path for power, storage or network where it matters; the rest named
+antifragile: Failures are logged and teach the next build | Faults are recorded by sensor so the next build plans for them
+local-first: Works with no internet; cloud is optional, never required | Runs on the box in the house; outside services are extras

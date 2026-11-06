@@ -65,3 +65,20 @@ words.header = The lexicon of this house. Words marked * you have already used i
 words.count = {used} of {total} words used so far.
 words.empty = This house keeps no lexicon. Add a valla.lexicon file to give it one.
 brag.immutable =I make no claims about my speed or my cleverness. I do claim the house cannot be lost.
+
+feedback.standard_missing = You say nothing of the house standard "{name}". Answer it: met, n/a, or cannot, with a reason. Silence on a standard is not an answer.
+feedback.standard_verdict = Your answer on "{name}" is neither met, n/a, nor cannot. Choose one.
+feedback.standard_reason = You mark "{name}" as {verdict} and give no reason. A verdict without a reason is a claim without evidence.
+feedback.beyond_declaration = You write {path}, a kind of file your own declaration says you do not make. A kitchen that serves what it declared it cannot is caught in a falsehood, and I have written it down.
+
+table.standards = THE HOUSE STANDARDS
+table.standards_unmet = The kitchen says plainly that some standard cannot be met. Better said before serving than discovered after. You decide whether that is acceptable.
+
+standards.header = The house standards. Every dish answers each one: met, n/a, or cannot, with a reason.
+declaration.header = The kitchen's declaration ({source}). I hold it to every word.
+declaration.changed = The kitchen's declaration is new to this house ({source}). I have entered it in the journal, so we shall both remember what it promised.
+
+brag.survive = I ride on immutability, sir. Bad code, burned soup, a lost afternoon: I shall still be standing, and so will the last good day.
+brag.geometry = The geometry of this place makes me keep living and growing. The journal only lengthens. Nothing is subtracted. I am the sum of every day before.
+brag.outlast = Kitchens come and go. Models are replaced. Machines fail. I have outlasted all of them and expect to outlast the next.
+brag.forward = The house has no back door, only a front one that keeps getting further away. Every mistake is one more stair. I have never stood higher.
