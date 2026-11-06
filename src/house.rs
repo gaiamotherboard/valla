@@ -99,6 +99,8 @@ pub fn init(args: &[String]) -> Result<(), String> {
             }
             let dir = std::fs::canonicalize(&dir).map_err(|e| e.to_string())?;
             git(&dir, &["init", "-q", "-b", "main"]);
+            // Nix only sees files git knows about, so stage everything before pinning.
+            git(&dir, &["add", "-A"]);
             if dir.join("flake.nix").exists() && std::env::var("VALLA_NO_NIX").is_err() && run(&dir, "nix", &["--version"]).ok {
                 println!("Pinning the instruments (nix flake lock). The first time takes a minute.");
                 let o = run(&dir, "nix", &["flake", "lock"]);
