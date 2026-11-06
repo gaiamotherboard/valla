@@ -41,6 +41,14 @@ valla journal                      # the books
 
 To keep an existing project: commit it, add a `valla.sensors` file, and run `valla init` inside it.
 
+## In a browser
+
+```
+valla web ~/valla-houses
+```
+
+Then open http://localhost:8090. It is a chat: type a request, watch Valla work, and the table arrives as a card with Approve, Decline and See the full change. The conversation is the journal itself, so nothing said is lost. Pick a house from the menu at the top. It listens on this machine only and keeps no login of its own; put it behind one (a Cloudflare Access tunnel, say) before opening it to anyone else.
+
 ## The kitchen
 
 Defaults to a local Ollama with `qwen3-coder:30b`. Settings go in `~/.config/valla/config`:

@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Valla</title>
+<style>
+  :root {
+    --ink: #1f1d1a; --muted: #6f6a62; --paper: #faf8f4; --card: #ffffff; --line: #e4dfd6;
+    --you: #e8eef6; --accent: #6b4f2a; --good: #2f6b3a; --bad: #9a2f2f;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.5 system-ui, sans-serif; }
+  header { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 12px; padding: 10px 16px;
+           background: var(--paper); border-bottom: 1px solid var(--line); }
+  header h1 { margin: 0; font: 600 22px Georgia, "Times New Roman", serif; letter-spacing: .5px; }
+  header .tag { color: var(--muted); font: italic 14px Georgia, serif; }
+  header select { margin-left: auto; font-size: 15px; padding: 4px 8px; }
+  main { max-width: 860px; margin: 0 auto; padding: 16px 16px 190px; }
+  .msg { margin: 10px 0; display: flex; }
+  .msg.you { justify-content: flex-end; }
+  .bubble { max-width: 85%; padding: 10px 14px; border-radius: 12px; background: var(--card); border: 1px solid var(--line); }
+  .you .bubble { background: var(--you); border-color: #d3dde9; }
+  .valla .bubble { font-family: Georgia, "Times New Roman", serif; }
+  .small .bubble { font-size: 14px; color: var(--muted); }
+  .meta { font: 12px system-ui, sans-serif; color: var(--muted); margin-top: 4px; }
+  .good { color: var(--good); } .bad { color: var(--bad); }
+  pre { white-space: pre-wrap; word-break: break-word; font: 13px/1.45 ui-monospace, Menlo, Consolas, monospace; margin: 6px 0 0; }
+  details summary { cursor: pointer; color: var(--muted); font: 13px system-ui, sans-serif; }
+  .table { border: 2px solid var(--accent); }
+  .table h2 { margin: 0 0 4px; font: 600 17px Georgia, serif; color: var(--accent); }
+  .buttons { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  button { font: 15px system-ui, sans-serif; padding: 7px 14px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); cursor: pointer; }
+  button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  button.danger { color: var(--bad); }
+  button:disabled { opacity: .5; cursor: default; }
+  footer { position: fixed; bottom: 0; left: 0; right: 0; background: var(--paper); border-top: 1px solid var(--line); }
+  footer .inner { max-width: 860px; margin: 0 auto; padding: 10px 16px 14px; }
+  .tools { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+  .tools button { font-size: 13px; padding: 4px 10px; }
+  .ask { display: flex; gap: 8px; }
+  textarea { flex: 1; resize: none; height: 64px; font: 16px system-ui, sans-serif; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); }
+  .working { font-style: italic; }
+  .empty { color: var(--muted); text-align: center; margin-top: 40px; font: italic 17px Georgia, serif; }
+  .err { color: var(--bad); font-size: 14px; min-height: 1.2em; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Valla</h1><span class="tag">steward of the codebase</span>
+  <select id="house" title="House"></select>
+</header>
+<main id="chat"></main>
+<footer><div class="inner">
+  <div class="tools">
+    <button data-act="words">Words</button>
+    <button data-act="journal">Journal</button>
+    <button data-act="doctor">Doctor</button>
+    <button data-act="restore" class="danger">Restore last known good</button>
+  </div>
+  <div class="ask">
+    <textarea id="text" placeholder="Ask Valla for a change. Press Enter to send, Shift+Enter for a new line."></textarea>
+    <button id="send" class="primary">Send</button>
+  </div>
+  <div class="err" id="err"></div>
+</div></footer>
+
+<script>
+const $ = s => document.querySelector(s);
+let house = new URLSearchParams(location.search).get("house") || "";
+let lastJson = "";
+let busy = false;
+
+function esc(s) { return String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function when(ts) { return ts ? ts.replace("T", " ").replace("Z", " UTC") : ""; }
+function sensors(s) { return s ? `<span class="${/FAIL/.test(s) ? "bad" : "good"}">${esc(s)}</span>` : ""; }
+
+function msg(who, html, ts, extra = "") {
+  return `<div class="msg ${who} ${extra}"><div class="bubble">${html}${ts ? `<div class="meta">${esc(when(ts))}</div>` : ""}</div></div>`;
+}
+
+function entry(e) {
+  const d = e.data || {};
+  switch (e.kind) {
+    case "request": return msg("you", esc(d.text).replace(/\n/g, "<br>"), e.ts);
+    case "init": return msg("valla", `The house is opened and the journal begun. Sensors: ${sensors(d.sensors)}.`, e.ts);
+    case "rejection": return msg("valla", `I sent the kitchen's attempt ${esc(d.attempt)} back.<pre>${esc(d.faults)}</pre>`, e.ts, "small");
+    case "escalation": return msg("valla", `The kitchen failed inspection. I will not serve this.${d.detail ? " " + esc(d.detail) + "." : ""} Perhaps rephrase the request.`, e.ts);
+    case "kitchen_down": return msg("valla", `The kitchen does not answer. <pre>${esc(d.detail)}</pre>`, e.ts);
+    case "presentation": return msg("valla", `The table is set. Sensors in the playground: ${sensors(d.sensors)}.`, e.ts);
+    case "override": return msg("valla", `Approved over the sensors' objection. Recorded.`, e.ts, "small");
+    case "approval": return msg("valla", `Served. The house stands at <code>${esc((d.commit || "").slice(0, 10))}</code>. Sensors: ${sensors(d.sensors)}.` +
+        (d.known_good === "yes" ? " Recorded as known good." : ` <span class="bad">Not known good; Restore will return to the last state that was.</span>`), e.ts);
+    case "decline": return msg("valla", `Removed from the table. The kitchen's effort is in the journal.`, e.ts, "small");
+    case "restore": return msg("valla", `Restored to entry ${esc(d.to_entry)}. Every byte as it was. Sensors: ${sensors(d.sensors)}.`, e.ts);
+    case "doctor": return msg("valla", `Doctor's visit. Kitchen ${esc(d.kitchen)}. Sensors: ${sensors(d.sensors)}.`, e.ts, "small");
+    default: return "";
+  }
+}
+
+function render(s) {
+  const sel = $("#house");
+  sel.innerHTML = (s.houses || []).map(h => `<option ${h === s.house ? "selected" : ""}>${esc(h)}</option>`).join("");
+  house = s.house || "";
+  document.title = house ? `Valla · ${house}` : "Valla";
+  let html = (s.journal || []).map(entry).join("");
+  if (!html) html = `<div class="empty">The journal is open and empty. Ask for something below.</div>`;
+
+  if (s.last) {
+    const full = ["words", "journal", "diff", "doctor"].includes(s.last.label);
+    html += full
+      ? msg("valla", `<pre>${esc(s.last.output)}</pre>`)
+      : msg("valla", `<details><summary>What I said while doing "${esc(s.last.label)}"</summary><pre>${esc(s.last.output)}</pre></details>`, "", "small");
+  }
+  if (s.table && !s.job) {
+    const failed = /FAIL/.test(s.table);
+    const text = s.table.split("\n").filter(l => !/^valla approve\s+\|/.test(l)).join("\n").trim();
+    html += `<div class="msg valla"><div class="bubble table"><h2>On the table</h2><pre>${esc(text)}</pre>
+      <div class="buttons">
+        ${failed ? `<button class="danger" data-act="approve-anyway">Approve anyway</button>` : `<button class="primary" data-act="approve">Approve</button>`}
+        <button data-act="decline">Decline</button>
+        <button data-act="diff">See the full change</button>
+      </div></div></div>`;
+  }
+  if (s.job) {
+    html += msg("valla", `<span class="working">At work on "${esc(s.job.label)}" (${s.job.seconds}s)...</span><pre>${esc(s.job.log)}</pre>`);
+  }
+  const atBottom = innerHeight + scrollY >= document.body.scrollHeight - 80;
+  $("#chat").innerHTML = html;
+  if (atBottom) scrollTo(0, document.body.scrollHeight);
+  busy = !!s.job;
+  document.querySelectorAll("button[data-act], #send").forEach(b => b.disabled = busy);
+}
+
+async function poll() {
+  try {
+    const r = await fetch(`/api/state?house=${encodeURIComponent(house)}`);
+    const t = await r.text();
+    if (t !== lastJson) { lastJson = t; render(JSON.parse(t)); }
+  } catch (e) { $("#err").textContent = "Cannot reach Valla."; }
+  setTimeout(poll, busy ? 1200 : 4000);
+}
+
+async function act(action, text = "") {
+  $("#err").textContent = "";
+  if (action === "restore" && !confirm("Return the house to the last known-good state? History is kept; the restore is a new entry.")) return;
+  const body = new URLSearchParams({ house, action, text });
+  const r = await fetch("/api/do", { method: "POST", body });
+  if (!r.ok) { const j = await r.json().catch(() => ({})); $("#err").textContent = j.error || "That did not work."; return; }
+  busy = true; lastJson = ""; setTimeout(poll, 300);
+}
+
+document.addEventListener("click", e => {
+  const b = e.target.closest("button[data-act]");
+  if (b) act(b.dataset.act);
+});
+$("#send").onclick = () => {
+  const t = $("#text").value.trim();
+  if (!t) return;
+  $("#text").value = "";
+  act("ask", t);
+};
+$("#text").addEventListener("keydown", e => {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("#send").click(); }
+});
+$("#house").onchange = e => {
+  house = e.target.value; lastJson = "";
+  history.replaceState(null, "", `?house=${encodeURIComponent(house)}`);
+  poll();
+};
+poll();
+</script>
+</body>
+</html>

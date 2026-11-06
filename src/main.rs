@@ -15,6 +15,7 @@ mod sensors;
 mod sha256;
 mod util;
 mod voice;
+mod web;
 
 const HELP: &str = "Valla, steward of the codebase.
 
@@ -31,6 +32,8 @@ const HELP: &str = "Valla, steward of the codebase.
   valla doctor                   machine, kitchen, journal and sensors, checked
   valla words                    the proper words for this house, and which you have used
   valla recipes                  sample tools I can lay out
+  valla web [folder] [--port N]  the chat in a browser, for one house or a folder of them
+                                 (localhost only unless --bind; it has no login of its own)
 
 Kitchen settings: ~/.config/valla/config  (kitchen_url, model, api_key)";
 
@@ -56,6 +59,7 @@ fn main() {
         "journal" => house::journal(rest.first().and_then(|s| s.parse().ok()).unwrap_or(20)),
         "doctor" => house::doctor(),
         "words" => house::words(),
+        "web" => web::serve(rest),
         "recipes" => {
             house::list_recipes();
             Ok(())
