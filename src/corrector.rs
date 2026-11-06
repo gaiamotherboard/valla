@@ -1,6 +1,8 @@
 //! The corrector's duty. Every check here is plain code: no model is asked whether it behaved.
 
 use crate::form::{Form, SECTIONS};
+use crate::declaration::Declaration;
+use crate::standards::{Standard, Verdict};
 use crate::{util, voice};
 use std::collections::HashSet;
 use std::path::Path;
@@ -22,7 +24,7 @@ fn safe_path(p: &str) -> bool {
 }
 
 /// Inspect a return. `house` is the committed state the kitchen was shown.
-pub fn inspect(form: &Form, request: &str, house: &Path) -> Vec<Fault> {
+pub fn inspect(form: &Form, request: &str, house: &Path, standards: &[Standard], decl: &Declaration) -> Vec<Fault> {
     let mut faults = Vec::new();
 
     for s in SECTIONS {
@@ -93,6 +95,26 @@ pub fn inspect(form: &Form, request: &str, house: &Path) -> Vec<Fault> {
         }
         if !plan_text.contains(path) {
             faults.push(fault("eisegesis", "feedback.eisegesis", &[("path", path)]));
+        }
+    }
+    // The kitchen's declaration: a dish it said it cannot make is refused unopened.
+    for ch in &form.changes {
+        if safe_path(ch.path()) && !decl.allows(ch.path()) {
+            faults.push(fault("beyond_declaration", "feedback.beyond_declaration", &[("path", ch.path())]));
+        }
+    }
+
+    // House standards: each answered as met, n/a or cannot; the last two with a reason.
+    if form.present.iter().any(|p| p == "STANDARDS") {
+        for st in standards {
+            match form.standards.iter().find(|a| a.name == st.name) {
+                None => faults.push(fault("standard_missing", "feedback.standard_missing", &[("name", &st.name)])),
+                Some(a) => match &a.verdict {
+                    None => faults.push(fault("standard_verdict", "feedback.standard_verdict", &[("name", &st.name)])),
+                    Some(v) if a.reason.is_empty() => faults.push(fault("standard_reason", "feedback.standard_reason", &[("name", &st.name), ("verdict", v.word())])),
+                    Some(Verdict::Met) | Some(Verdict::NotApplying) | Some(Verdict::Cannot) => {}
+                },
+            }
         }
     }
     if !form.plan.is_empty() && form.changes.is_empty() && form.present.iter().any(|p| p == "CHANGES") {

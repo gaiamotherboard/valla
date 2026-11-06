@@ -1,0 +1,16 @@
+# The kitchen's declaration: what it can and cannot do. Valla holds it to this.
+# Replace it with ~/.config/valla/kitchen.declaration for your own kitchen.
+#   files:   the kinds of file it may write (a suffix like .rs, or an exact name like .gitignore)
+#   can:     what it handles
+#   cannot:  what it does not handle, will not attempt, or cannot check
+#   needs:   what it requires from the house
+
+files: .rs .toml .nix .py .md .txt .html .css .js .json .sh .sql .yaml .yml .csv .tsv .sensors .lexicon .standards .gitignore
+can: write and change code in Rust, Python, Nix, shell, HTML, CSS and JavaScript
+can: write docs, config files, sensors and tests
+cannot: run code or tests; the sensors do that
+cannot: touch real hardware, or prove a hardware standard is met; only a sensor on the machine can
+cannot: reach the internet or see any file it was not shown
+cannot: write binary files (images, databases, archives)
+needs: the request, the committed files of the house, and the house standards
+needs: sensors in valla.sensors to show the work is done

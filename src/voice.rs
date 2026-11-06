@@ -22,11 +22,18 @@ pub fn say(key: &str, slots: &[(&str, &str)]) {
     println!("{}", line(key, slots));
 }
 
+/// His one vanity, aired. A different boast each time; every one true by construction.
+pub fn brag() {
+    let keys = ["brag.immutable", "brag.survive", "brag.geometry", "brag.outlast", "brag.forward"];
+    let i = (crate::util::now_secs() as usize) % keys.len();
+    say(keys[i], &[]);
+}
+
 #[cfg(test)]
 mod tests {
     #[test]
     fn every_used_key_exists() {
-        for k in ["ask.received", "table.footer", "restore.done", "feedback.eisegesis"] {
+        for k in ["ask.received", "table.footer", "restore.done", "feedback.eisegesis", "feedback.standard_missing", "feedback.beyond_declaration", "table.standards", "brag.survive", "brag.geometry", "brag.outlast", "brag.forward", "standards.header", "declaration.changed"] {
             assert!(!super::line(k, &[]).starts_with('['), "missing {}", k);
         }
     }

@@ -1,12 +1,14 @@
 //! The house: a git repository Valla keeps. Every duty of the steward lives here.
 
 use crate::corrector;
+use crate::declaration;
 use crate::form::{self, Change};
 use crate::journal::Journal;
 use crate::kitchen::{Kitchen, Message};
 use crate::lexicon;
 use crate::recipes;
 use crate::sensors::{self, Reading};
+use crate::standards::{self, Verdict};
 use crate::util::{self, run};
 use crate::voice::{line, say};
 use std::path::{Path, PathBuf};
@@ -180,6 +182,14 @@ pub fn ask(request: &str) -> Result<(), String> {
     }
 
     let kitchen = Kitchen::from_settings();
+    let decl = declaration::load();
+    let stds = standards::load(&house);
+    let fp = decl.fingerprint();
+    let last_fp = j.entries().into_iter().rev().find(|e| e.kind == "declaration").and_then(|e| e.data.get("sha256").cloned());
+    if last_fp.as_deref() != Some(fp.as_str()) {
+        j.write("declaration", &[("source", &decl.source), ("sha256", &fp), ("text", &decl.text)]);
+        say("declaration.changed", &[("source", &decl.source)]);
+    }
     let work = house.join(".valla/work").join(&id);
     let _ = std::fs::create_dir_all(&work);
     j.write("brief", &[("request", &n.to_string()), ("kitchen", &kitchen.describe())]);
@@ -188,7 +198,15 @@ pub fn ask(request: &str) -> Result<(), String> {
         Message { role: "system", content: KITCHEN_PROMPT.to_string() },
         Message {
             role: "user",
-            content: format!("REQUEST:\n{}\n\n{}\nFILES (committed state {}):\n\n{}", request, lx.for_kitchen(), short(&base), context(&house)),
+            content: format!(
+                "REQUEST:\n{}\n\n{}\n{}\n{}\nFILES (committed state {}):\n\n{}",
+                request,
+                decl.for_kitchen(),
+                standards::for_kitchen(&stds),
+                lx.for_kitchen(),
+                short(&base),
+                context(&house)
+            ),
         },
     ];
     let mut accepted: Option<(form::Form, String)> = None;
@@ -209,7 +227,7 @@ pub fn ask(request: &str) -> Result<(), String> {
         j.write("return", &[("request", &n.to_string()), ("attempt", &attempt.to_string()), ("sha256", &crate::sha256::hex(raw.as_bytes())), ("seconds", &format!("{:.0}", secs))]);
         say("ask.returned", &[("attempt", &attempt.to_string())]);
         let f = form::parse(&raw);
-        let faults = corrector::inspect(&f, request, &house);
+        let faults = corrector::inspect(&f, request, &house, &stds, &decl);
         if faults.is_empty() {
             j.write("inspection", &[("request", &n.to_string()), ("attempt", &attempt.to_string()), ("result", "pass")]);
             accepted = Some((f, raw));
@@ -318,6 +336,15 @@ pub fn table() -> Result<(), String> {
     }
     for s in &f.silence {
         println!("  - {}", s);
+    }
+    println!("\n{}\n{}", line("table.standards", &[]), rule);
+    for a in &f.standards {
+        let v = a.verdict.as_ref().map(|v| v.word()).unwrap_or("?");
+        let flag = if a.verdict == Some(Verdict::Cannot) { "  <-- NOT MET" } else { "" };
+        println!("  {:<15} {:<7} {}{}", a.name, v, a.reason, flag);
+    }
+    if f.standards.iter().any(|a| a.verdict == Some(Verdict::Cannot)) {
+        println!("{}", line("table.standards_unmet", &[]));
     }
     println!("\n{}\n{}", line("table.change", &[]), rule);
     for p in &f.plan {
@@ -560,6 +587,10 @@ pub fn doctor() -> Result<(), String> {
             faults += 1;
         }
     }
+    let d = declaration::load();
+    println!("  {:<14} {} ({} can, {} cannot)", "declaration", d.source, d.can.len(), d.cannot.len());
+    let stds = standards::load(house.as_deref().unwrap_or(&here));
+    println!("  {:<14} {}", "standards", stds.iter().map(|s| s.name.as_str()).collect::<Vec<_>>().join(", "));
     let kitchen = Kitchen::from_settings();
     let scratch = std::env::temp_dir();
     let speed = match kitchen.ping(&scratch) {
@@ -604,6 +635,29 @@ pub fn doctor() -> Result<(), String> {
         say("doctor.faults", &[("count", &faults.to_string())]);
         Err(String::new())
     }
+}
+
+pub fn standards() -> Result<(), String> {
+    let here = std::env::current_dir().map_err(|e| e.to_string())?;
+    let house = find_root().unwrap_or(here);
+    say("standards.header", &[]);
+    for st in standards::load(&house) {
+        println!("  {}\n      software: {}\n      hardware: {}", st.name, st.software, st.hardware);
+    }
+    let d = declaration::load();
+    println!();
+    say("declaration.header", &[("source", &d.source)]);
+    println!("  files:  {}", d.files.join(" "));
+    for c in &d.can {
+        println!("  can:    {}", c);
+    }
+    for c in &d.cannot {
+        println!("  cannot: {}", c);
+    }
+    for c in &d.needs {
+        println!("  needs:  {}", c);
+    }
+    Ok(())
 }
 
 pub fn list_recipes() {

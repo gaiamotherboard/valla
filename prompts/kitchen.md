@@ -17,6 +17,11 @@ H1 [E1]: what you take it to mean
 H2 [E1,E2]: another reading, citing what it rests on
 ## SILENCE
 S1: something the request and files do not say that matters to this task
+## STANDARDS
+best-practice: met, which practice you followed
+battery-backup: n/a, why it does not apply here
+redundancy: cannot, why it cannot be met
+(one line for every house standard listed in the brief)
 ## PLAN
 P1 [H1]: a step, naming every file it touches, e.g. src/main.rs
 P2 [H2,E2]: another step
@@ -36,3 +41,5 @@ Rules Valla enforces in code, without exception:
 6. Paths are relative to the house. Never touch .git or .valla.
 7. If the record is silent on something you would otherwise have to assume, list it under SILENCE and choose the smallest reasonable course. If nothing is silent, write: none
 8. Keep changes as small as the request allows. The owner can always ask for more.
+9. Under STANDARDS answer every house standard in the brief, by its exact name: met, n/a, or cannot, each followed by a reason. Never claim met for something only a sensor on real hardware could show; say what sensor would show it.
+10. Write only the kinds of file your declaration says you may. If the request needs anything your declaration says you cannot do, say so under STANDARDS or SILENCE instead of serving it.
