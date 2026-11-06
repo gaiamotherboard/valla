@@ -1,0 +1,57 @@
+# Valla's lines. One per key: key = text. {name} marks a slot.
+# The core decides when he speaks. This file decides how. Improve freely.
+
+greet.init = The house is opened and the journal begun. Entry {n}. I keep the books from here.
+greet.init_recipe = {recipe} has been laid out in {dir}. The house is opened, the journal begun, and the sensors consulted. They report {result}.
+
+ask.received = Very good. I have written your request into the journal as entry {n} and sent word to the kitchen.
+ask.dirty = A word before I begin: the house has uncommitted changes. I shall work from the last committed state and leave yours untouched.
+ask.pending = There is already a dish on the table ({id}). Approve it or decline it before I send for another.
+ask.kitchen_down = The kitchen does not answer. {detail}
+ask.returned = The kitchen has returned attempt {attempt}. Inspecting.
+ask.rejected = I have sent it back. {count} fault(s):
+ask.escalate = The kitchen has failed inspection {attempts} times. I will not serve this. The faults are in the journal, entries {from} to {to}. Perhaps the request wants rephrasing, or the kitchen wants a better cook.
+ask.served = The table is set. Proposal {id}. Sensors report {result}. When you are ready: valla table
+
+feedback.header = Your return failed inspection. Correct these faults and return the complete form again, every section:
+feedback.missing_section = The {section} section is missing. Every section is required, even if it only says none.
+feedback.bad_quote = {id} quotes "{quote}", which does not appear in {source}. Quote exactly or not at all.
+feedback.bad_source = {id} cites the source "{source}", which does not exist in this house.
+feedback.no_cite = {id} cites nothing. Every reading and every step must rest on the record.
+feedback.dead_cite = {id} cites {cite}, which does not exist.
+feedback.eisegesis = You change {path}, but no step of your plan mentions it. That is eisegesis: reading in what is not there.
+feedback.bad_path = {path} is not a place you may write.
+feedback.no_changes = The plan has steps but there are no changes. Either change something or say plainly that nothing need change.
+feedback.malformed = {id} could not be read: {line}
+
+table.empty = The table is clear. Nothing awaits your approval.
+table.header = Proposal {id}, prepared {when}.
+table.asked = WHAT YOU ASKED
+table.meaning = WHAT I TAKE IT TO MEAN
+table.silence = WHAT NOBODY HAS SAID
+table.silence_none = The record is silent on nothing I could find. I remain suspicious on principle.
+table.change = WHAT WILL CHANGE
+table.sensors = WHAT THE SENSORS SAY
+table.footer = valla approve  |  valla decline  |  valla diff
+
+approve.none = There is nothing on the table to approve.
+approve.blocked = I cannot serve it: {detail}
+approve.sensors_object = The sensors object to this dish, and I do not serve what the instruments refuse. If you wish to overrule them, say valla approve --anyway, and I shall record that you did. Otherwise, valla decline.
+approve.done =Served. Entry {n}. The house now stands at {commit}. Sensors: {result}.
+approve.known_good = This state is recorded as known good. Should the kitchen have another inventive afternoon, valla restore returns us here.
+approve.sensors_failed = The sensors object after serving. The house is not marked known good. valla restore will return it to entry {good}.
+
+decline.done = Removed from the table. Entry {n}. The kitchen's effort is in the journal, should anyone ask.
+
+restore.none = I find no known-good state to return to. The journal has nothing I can swear to.
+restore.same = The house already stands exactly as it stood at entry {n}. Nothing to do. I mention it only because it pleases me.
+restore.done = Restored to entry {n} ({commit}). Every byte as it was. History is not rewritten; the restoration is itself a new entry, {entry}. Sensors: {result}. I mention it only because it is the one thing I am permitted to be proud of.
+
+doctor.header = Doctor's report for {host}.
+doctor.ok = All present, the gate is locked, the journal is unbroken. The kitchen is {speed}. Well-mannered, I am told.
+doctor.faults = {count} matter(s) want attention before I can vouch for this house.
+
+journal.broken = The journal is broken at entry {n}. Someone has edited the books. I take this personally.
+journal.ok = {count} entries, unbroken from the first.
+
+brag.immutable = I make no claims about my speed or my cleverness. I do claim the house cannot be lost.

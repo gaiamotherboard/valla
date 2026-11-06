@@ -1,0 +1,5 @@
+# Valla's sensors for this house. One per line:  name: shell command
+# A sensor passes when its command exits 0. Valla calls nothing true that these have not confirmed.
+builds: cargo build --quiet
+tests: cargo test --quiet
+serves: cargo build --quiet && (./target/debug/inventarium --port 18080 --data /tmp/inventarium-sensor.tsv >/dev/null & p=$!; sleep 1; curl -sf http://127.0.0.1:18080/ >/dev/null; r=$?; kill $p; rm -f /tmp/inventarium-sensor.tsv; exit $r)
