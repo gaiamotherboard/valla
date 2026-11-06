@@ -1,0 +1,50 @@
+# The words of game-making, and where each lives in Star Cat.
+# word <term>: <what it means> @ <where to see it>
+# vague <term>: <what Valla says when you use it>
+# Use these words when you ask Valla for things. Precise words get precise work.
+
+word variable: A name that holds a value, like a labelled box. Change the value and the game changes. @ world.py: speed: float = 360.0
+word value: What a variable holds right now: a number, some text, True or False. @ world.py: lives: int = 3
+word constant: A variable meant never to change while the game runs. Written in CAPITALS by habit. @ world.py: WIDTH, HEIGHT = 800, 600
+word function: A named set of steps you can run again and again. @ game.py: def draw_cat(screen, cat)
+word parameter: An input a function needs to do its job. @ game.py: def draw_cat(screen, cat) takes screen and cat
+word return: What a function hands back when it finishes. @ world.py: caught() returns True or False
+word class: A blueprint for a kind of thing. Every Star is made from the Star class. @ world.py: class Star
+word object: One thing made from a class: this star, that star. @ world.py: Star(x=..., y=..., speed=...)
+word attribute: A variable that belongs to an object, like a star's speed or the cat's x. @ world.py: star.speed
+word method: A function that belongs to a class. @ world.py: World.step
+word list: An ordered collection of things, like all the stars on screen. @ world.py: stars: list
+word loop: Steps that repeat. A for loop goes through every item in a list. @ world.py: for star in self.stars
+word condition: A question with a yes or no answer that decides what happens next, written with if. @ world.py: if self.caught(star)
+word boolean: A value that is only True or False. @ world.py: the over property
+word game loop: The loop that runs every frame: read input, update the world, draw it. @ game.py: while running
+word frame: One picture of the game. Star Cat draws 60 frames every second. @ game.py: FPS = 60
+word delta time: How many seconds passed since the last frame, called dt. Moving by speed times dt keeps motion smooth on any computer. @ world.py: star.y += star.speed * dt
+word update: The step where the rules move everything forward one frame. @ world.py: World.step
+word render: Drawing the world onto the screen. @ game.py: def draw
+word coordinates: x and y positions on the screen. x grows to the right, y grows downward. @ world.py: Cat x and y
+word collision: When two things touch. Checking for it is called collision detection. @ world.py: def caught
+word spawn: Making a new thing appear in the game. @ world.py: def spawn
+word event: Something that happens, like a key press or closing the window. @ game.py: for event in pygame.event.get()
+word input: What the player does: keys, mouse, controller. @ game.py: pygame.key.get_pressed()
+word state: Everything the game remembers right now: score, lives, where things are. @ world.py: class World
+word random: A value chosen by chance. A seed makes the chance repeatable. @ world.py: rng.uniform
+word score: A variable that counts what the player has earned. @ world.py: score: int = 0
+word HUD: Heads-up display: the score and lives drawn on top of the game. @ game.py: hud = font.render(...)
+word color: Written as (red, green, blue), each from 0 to 255. @ game.py: STAR = (255, 220, 90)
+word bug: The game doing something you did not mean. Not a failure, just the next thing to fix.
+word test: Code that checks the rules work, so a change cannot quietly break them. @ test_world.py
+word sensor: A check Valla runs that proves something about the game, like that it starts without crashing. @ valla.sensors
+word import: Bringing in code from another file or library. @ game.py: import pygame
+
+vague faster: Faster how? The cat's speed (Cat speed), how fast stars fall (Star speed), or how often stars spawn (spawn_every)?
+vague slower: Slower how? The cat's speed, how fast stars fall, or how often stars spawn?
+vague harder: Harder how? Faster falling stars, more frequent spawns, fewer lives, or a smaller cat?
+vague easier: Easier how? Slower stars, fewer spawns, more lives, or a bigger cat?
+vague bigger: Bigger which thing? The cat's size, the stars' size, or the window (WIDTH and HEIGHT)?
+vague smaller: Smaller which thing? The cat's size, the stars' size, or the window?
+vague better: Better in what way? Name the one thing you would change.
+vague cooler: Cooler in what way? A new color, a sound, an animation, a new kind of star?
+vague fix: Fix what, exactly? Say what happens now, and what you want to happen instead.
+vague broken: What is broken? Say what you did, what happened, and what you expected.
+vague stuff: Which stuff? Name the thing in the game.

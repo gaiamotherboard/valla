@@ -9,6 +9,7 @@ mod house;
 mod journal;
 mod json;
 mod kitchen;
+mod lexicon;
 mod recipes;
 mod sensors;
 mod sha256;
@@ -28,6 +29,7 @@ const HELP: &str = "Valla, steward of the codebase.
   valla restore [entry]          return the house to the last known-good state (or that entry)
   valla journal [count]          the books, and whether they are unbroken
   valla doctor                   machine, kitchen, journal and sensors, checked
+  valla words                    the proper words for this house, and which you have used
   valla recipes                  sample tools I can lay out
 
 Kitchen settings: ~/.config/valla/config  (kitchen_url, model, api_key)";
@@ -53,6 +55,7 @@ fn main() {
         "restore" => house::restore(rest.first().and_then(|s| s.parse().ok())),
         "journal" => house::journal(rest.first().and_then(|s| s.parse().ok()).unwrap_or(20)),
         "doctor" => house::doctor(),
+        "words" => house::words(),
         "recipes" => {
             house::list_recipes();
             Ok(())

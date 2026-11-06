@@ -25,6 +25,8 @@ pub const ALL: &[Recipe] = &[Recipe {
     about: "Game workshop in Python with pygame. Starts as Star Cat; ask for whatever game you like.",
     files: &[
         ("README.md", include_str!("../recipes/ludus/README.md")),
+        ("QUESTS.md", include_str!("../recipes/ludus/QUESTS.md")),
+        ("valla.lexicon", include_str!("../recipes/ludus/valla.lexicon")),
         ("flake.nix", include_str!("../recipes/ludus/flake.nix")),
         ("valla.sensors", include_str!("../recipes/ludus/valla.sensors")),
         (".gitignore", include_str!("../recipes/ludus/gitignore")),

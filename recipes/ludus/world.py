@@ -41,16 +41,18 @@ class World:
         return self.missed >= self.lives
 
     def spawn(self) -> Star:
+        # Spawn: a new star appears at a random x, just above the screen.
         star = Star(x=self.rng.uniform(30, WIDTH - 30), y=-20, speed=self.rng.uniform(140, 240) + self.score * 4)
         self.stars.append(star)
         return star
 
     def caught(self, star: Star) -> bool:
+        # Collision detection: does this star touch the cat?
         reach = self.cat.size / 2 + star.size
         return abs(star.x - self.cat.x) < reach and abs(star.y - self.cat.y) < reach
 
     def step(self, dt: float, left: bool = False, right: bool = False) -> None:
-        """Advance the world by dt seconds."""
+        """The update: advance the world by dt (delta time) seconds."""
         if self.over:
             return
         direction = int(right) - int(left)

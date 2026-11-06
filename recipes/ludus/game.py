@@ -62,21 +62,25 @@ def main(argv):
 
     count = 0
     running = True
+    # The game loop: every frame, read input, update the world, render it.
     while running:
         dt = clock.tick(FPS) / 1000
         if frames is not None:
             dt = 1 / FPS  # fixed steps when checking, so the run is repeatable
+        # Events: things that happened since the last frame.
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_r and world.over:
                 world = World()
+        # Input: which keys are held down right now.
         keys = pygame.key.get_pressed()
         world.step(
             dt,
             left=keys[pygame.K_LEFT] or keys[pygame.K_a],
             right=keys[pygame.K_RIGHT] or keys[pygame.K_d],
         )
+        # Render: draw the world onto the screen.
         draw(screen, font, world)
         pygame.display.flip()
         count += 1

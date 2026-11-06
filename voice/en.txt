@@ -54,4 +54,14 @@ doctor.faults = {count} matter(s) want attention before I can vouch for this hou
 journal.broken = The journal is broken at entry {n}. Someone has edited the books. I take this personally.
 journal.ok = {count} entries, unbroken from the first.
 
-brag.immutable = I make no claims about my speed or my cleverness. I do claim the house cannot be lost.
+words.vague = You said "{term}". {better}
+words.vague_footer = I shall send it to the kitchen as written, and list what it leaves unsaid. Precise words get precise work.
+words.section = THE WORDS
+words.new = New word, used by you for the first time: {term}. {meaning}
+words.yours = Words you used: {list}
+words.mine = Words in my reading you might use next time:
+words.none_yet = The lexicon is here for whenever you want it: valla words
+words.header = The lexicon of this house. Words marked * you have already used in a request.
+words.count = {used} of {total} words used so far.
+words.empty = This house keeps no lexicon. Add a valla.lexicon file to give it one.
+brag.immutable =I make no claims about my speed or my cleverness. I do claim the house cannot be lost.

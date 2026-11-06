@@ -12,6 +12,12 @@ nix develop --command python3 game.py
 
 Left and right arrows (or A and D) to move.
 
+## Learn the words
+
+Making games has its own language: *variable*, *function*, *collision*, *game loop*. The better your words, the better Valla's work. `QUESTS.md` is a ladder of twelve changes, each teaching a few words. `valla words` lists them all, with where each lives in the code, and marks the ones you have used.
+
+If you ask with a vague word like *faster* or *better*, Valla will say what it leaves unsaid and suggest the precise way to ask.
+
 ## Make it yours
 
 From inside this folder:

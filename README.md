@@ -59,6 +59,10 @@ context = 32768
 
 A house declares its sensors in `valla.sensors`, one per line, `name: command`. A sensor passes when its command exits 0. If the house has a `flake.nix`, each sensor runs inside `nix develop`, so the instruments are pinned along with the code.
 
+## The lexicon
+
+A house may keep a `valla.lexicon`: the proper words for its kind of work, each with what it means and where it lives in the code, plus vague words and the better question to ask instead. Valla flags vague words when you ask, shows on the table which proper words were in play, has the kitchen use them in its readings, and counts the ones you have used yourself (`valla words`). Precise words get precise work.
+
 ## Recipes
 
 Sample business tools Valla can lay out and then adapt on request. `valla recipes` lists them. **Inventarium**, an inventory tracker (Rust). **Ludus**, a game workshop (Python with pygame) that starts as Star Cat; ask for any game you like. More are welcome.

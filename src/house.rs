@@ -4,6 +4,7 @@ use crate::corrector;
 use crate::form::{self, Change};
 use crate::journal::Journal;
 use crate::kitchen::{Kitchen, Message};
+use crate::lexicon;
 use crate::recipes;
 use crate::sensors::{self, Reading};
 use crate::util::{self, run};
@@ -169,6 +170,14 @@ pub fn ask(request: &str) -> Result<(), String> {
     let n = j.write("request", &[("text", request), ("base", &base)]);
     let id = format!("{:04}", n);
     say("ask.received", &[("n", &n.to_string())]);
+    let lx = lexicon::load(&house);
+    let vague = lx.vague_in(request);
+    for v in &vague {
+        say("words.vague", &[("term", &v.term), ("better", &v.better)]);
+    }
+    if !vague.is_empty() {
+        say("words.vague_footer", &[]);
+    }
 
     let kitchen = Kitchen::from_settings();
     let work = house.join(".valla/work").join(&id);
@@ -177,7 +186,10 @@ pub fn ask(request: &str) -> Result<(), String> {
 
     let mut msgs = vec![
         Message { role: "system", content: KITCHEN_PROMPT.to_string() },
-        Message { role: "user", content: format!("REQUEST:\n{}\n\nFILES (committed state {}):\n\n{}", request, short(&base), context(&house)) },
+        Message {
+            role: "user",
+            content: format!("REQUEST:\n{}\n\n{}\nFILES (committed state {}):\n\n{}", request, lx.for_kitchen(), short(&base), context(&house)),
+        },
     ];
     let mut accepted: Option<(form::Form, String)> = None;
     let mut first_reject = 0;
@@ -314,7 +326,73 @@ pub fn table() -> Result<(), String> {
     println!("{}", git(&house, &["diff", "--stat", &meta(&pd, "base"), &meta(&pd, "commit")]).text);
     println!("\n{}\n{}", line("table.sensors", &[]), rule);
     println!("{}", util::read(&pd.join("sensors.txt")).trim());
+    let lx = lexicon::load(&house);
+    if !lx.is_empty() {
+        let request = util::read(&pd.join("request.txt"));
+        let entry: u64 = meta(&pd, "entry").parse().unwrap_or(0);
+        println!("\n{}\n{}", line("words.section", &[]), rule);
+        for v in lx.vague_in(&request) {
+            println!("{}", line("words.vague", &[("term", &v.term), ("better", &v.better)]));
+        }
+        let earlier = earlier_requests(&house, entry);
+        let yours = lx.words_in(&request);
+        for w in yours.iter().filter(|w| !lexicon::mentions(&earlier, &w.term)) {
+            println!("{}", line("words.new", &[("term", &w.term), ("meaning", &w.meaning)]));
+        }
+        if !yours.is_empty() {
+            let list = yours.iter().map(|w| w.term.as_str()).collect::<Vec<_>>().join(", ");
+            println!("{}", line("words.yours", &[("list", &list)]));
+        }
+        let reading: String = f.hermeneutics.iter().chain(f.plan.iter()).map(|c| c.text.as_str()).collect::<Vec<_>>().join("\n");
+        let mine: Vec<_> = lx.words_in(&reading).into_iter().filter(|w| !lexicon::mentions(&request, &w.term)).collect();
+        if !mine.is_empty() {
+            println!("{}", line("words.mine", &[]));
+            for w in mine {
+                println!("  {}: {}{}", w.term, w.meaning, if w.place.is_empty() { String::new() } else { format!("  (see {})", w.place) });
+            }
+        } else if yours.is_empty() {
+            println!("{}", line("words.none_yet", &[]));
+        }
+    }
     println!("\n{}", line("table.footer", &[]));
+    Ok(())
+}
+
+/// The text of every request in the journal before entry `before`.
+fn earlier_requests(house: &Path, before: u64) -> String {
+    Journal::open(house)
+        .entries()
+        .into_iter()
+        .filter(|e| e.kind == "request" && e.n < before)
+        .filter_map(|e| e.data.get("text").cloned())
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+pub fn words() -> Result<(), String> {
+    let house = find_root()?;
+    let lx = lexicon::load(&house);
+    if lx.words.is_empty() {
+        say("words.empty", &[]);
+        return Ok(());
+    }
+    let asked = earlier_requests(&house, u64::MAX);
+    say("words.header", &[]);
+    let mut used = 0;
+    for w in &lx.words {
+        let mark = if lexicon::mentions(&asked, &w.term) {
+            used += 1;
+            "*"
+        } else {
+            " "
+        };
+        println!("\n {} {}\n     {}", mark, w.term, w.meaning);
+        if !w.place.is_empty() {
+            println!("     In this house: {}", w.place);
+        }
+    }
+    println!();
+    say("words.count", &[("used", &used.to_string()), ("total", &lx.words.len().to_string())]);
     Ok(())
 }
 
