@@ -61,7 +61,7 @@ A house declares its sensors in `valla.sensors`, one per line, `name: command`. 
 
 ## Recipes
 
-Sample business tools Valla can lay out and then adapt on request. `valla recipes` lists them. The first is **Inventarium**, an inventory tracker. More are welcome.
+Sample business tools Valla can lay out and then adapt on request. `valla recipes` lists them. **Inventarium**, an inventory tracker (Rust). **Ludus**, a game workshop (Python with pygame) that starts as Star Cat; ask for any game you like. More are welcome.
 
 ## Contributing
 

@@ -20,6 +20,18 @@ pub const ALL: &[Recipe] = &[Recipe {
         ("src/store.rs", include_str!("../recipes/inventarium/src/store.rs")),
         ("src/page.rs", include_str!("../recipes/inventarium/src/page.rs")),
     ],
+}, Recipe {
+    name: "ludus",
+    about: "Game workshop in Python with pygame. Starts as Star Cat; ask for whatever game you like.",
+    files: &[
+        ("README.md", include_str!("../recipes/ludus/README.md")),
+        ("flake.nix", include_str!("../recipes/ludus/flake.nix")),
+        ("valla.sensors", include_str!("../recipes/ludus/valla.sensors")),
+        (".gitignore", include_str!("../recipes/ludus/gitignore")),
+        ("world.py", include_str!("../recipes/ludus/world.py")),
+        ("game.py", include_str!("../recipes/ludus/game.py")),
+        ("test_world.py", include_str!("../recipes/ludus/test_world.py")),
+    ],
 }];
 
 pub fn find(name: &str) -> Option<&'static Recipe> {

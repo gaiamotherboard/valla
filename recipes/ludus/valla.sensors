@@ -1,0 +1,4 @@
+# Valla's sensors for this game. One per line:  name: shell command
+# "plays" really runs the game for three seconds with no window, so a game that crashes cannot pass.
+tests: python3 -m pytest -q -p no:cacheprovider
+plays: SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy python3 -B game.py --frames 180
